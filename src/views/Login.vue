@@ -29,12 +29,12 @@ const handleSubmit = async () => {
     alert('Email atau password salah')
   } else if (!error.value) {
     router.replace({ name: 'dashboard' })
-    // try {
-    //   await authStore.checkAuth()
-    //   router.replace({ name: 'dashboard' })
-    // } catch (e) {
-    //   console.error('Login berhasil tapi gagal validasi ulang:', e)
-    // }
+    try {
+      await authStore.checkAuth()
+      router.replace({ name: 'dashboard' })
+    } catch (e) {
+      console.error('Login berhasil tapi gagal validasi ulang:', e)
+    }
   }
 }
 </script>

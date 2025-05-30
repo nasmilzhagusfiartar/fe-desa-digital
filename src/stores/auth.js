@@ -1,60 +1,58 @@
 import { defineStore } from 'pinia'
-import api from '@/utils/axios' // import axios instance
+import Cookies from 'js-cookie'
+import { axiosInstance } from '@/plugins/axios'
+import { handleError } from '@/helpers/errorHelper'
+import router from '@/router'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     loading: false,
     error: null,
     user: null,
-    token: localStorage.getItem('token') || null,
+    success: null,
   }),
+  getters: {
+    token: (state) => Cookies.get('token'),
+  },
   actions: {
-    async login(form) {
+    async login(credentials) {
       this.loading = true
       this.error = null
       try {
-        const res = await api.post('/auth/login', form)
-        this.user = {
-          id: res.data.data.id,
-          name: res.data.data.name,
-          email: res.data.data.email,
-        }
-        this.token = res.data.data.token
-        localStorage.setItem('token', this.token)
-      } catch (err) {
-        if (err.response && err.response.status === 401) {
-          this.error = 'Unauthorized'
-        } else if (err.response && err.response.data) {
-          this.error = err.response.data.errors || 'Unknown error'
-        } else {
-          this.error = 'Something went wrong'
-        }
+        const response = await axiosInstance.post('/login', credentials)
+        const token = response.data.token
+
+        if (!token) throw new Error('Token tidak ditemukan')
+
+        Cookies.set('token', token)
+        this.success = 'Login success'
+        await this.checkAuth()
+        router.push({ name: 'dashboard' })
+      } catch (error) {
+        this.error = handleError(error) // make sure this returns a proper object
       } finally {
         this.loading = false
       }
     },
 
-    // async checkAuth() {
-    //   this.loading = true
-    //   this.error = null
-    //   try {
-    //     const res = await api.get('/auth/me')
-    //     this.user = res.data.data
-    //   } catch (err) {
-    //     this.user = null
-    //     this.token = null
-    //     localStorage.removeItem('token')
-    //     this.error = 'Not authenticated'
-    //     throw err
-    //   } finally {
-    //     this.loading = false
-    //   }
-    // },
+    async logout() {
+      Cookies.remove('token')
+      router.push({ name: 'login' })
+      ;(this.user = null), (this.error = null), (this.success = 'Logout Success')
+    },
 
-    logout() {
-      this.user = null
-      this.token = null
-      localStorage.removeItem('token')
+    async checkAuth() {
+      this.loading = true
+      try {
+        const response = await axiosInstance.get('/me')
+        this.user = response.data.data
+        return this.user
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          this.logout()
+        }
+      }
+      this.loading = false
     },
   },
 })

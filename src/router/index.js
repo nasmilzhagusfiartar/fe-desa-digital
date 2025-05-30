@@ -48,35 +48,36 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.meta.requiresAuth) {
     if (!authStore.token) {
-      return next({ name: 'login' })
-    }
+      try {
+        if (!authStore.user) {
+          await authStore.checkAuth()
+        }
 
-    try {
-      if (!authStore.user) {
-        await authStore.checkAuth()
+        const userPermissions = authStore.user?.permissions || []
+
+        if (to.meta.permission && !userPermissions.includes(to.meta.permission)) {
+          next({ name: 'error403' })
+          return
+        }
+
+        next()
+      } catch (error) {
+        next({ name: 'login' })
       }
-
+    } else {
       const userPermissions = authStore.user?.permissions || []
 
       if (to.meta.permission && !userPermissions.includes(to.meta.permission)) {
-        return next({ name: 'error403' })
+        next({ name: 'error403' })
+        return
       }
 
-      return next()
-    } catch (error) {
-      return next({ name: 'login' })
+      next()
     }
   } else if (to.meta.requiresUnauth && authStore.token) {
-    try {
-      if (!authStore.user) {
-        await authStore.checkAuth()
-      }
-      return next({ name: 'dashboard' })
-    } catch (error) {
-      return next()
-    }
+    next({ name: 'dashboard' })
   } else {
-    return next()
+    next()
   }
 })
 
