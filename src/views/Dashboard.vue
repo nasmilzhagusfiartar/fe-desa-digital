@@ -22,15 +22,16 @@ const getResidentStatistic = () => {
     },
     options: {
       scales: {
-        display: false,
-      },
-      datasets: {
-        doughnut: {
-          spacing: 2,
-          borderRadius: 6,
-          cutout: '69%',
+        r: {
+          display: false,
         },
       },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      cutout: '69%',
     },
   })
 }

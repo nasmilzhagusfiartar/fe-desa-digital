@@ -1,3 +1,4 @@
+// auth.js
 import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
 import { axiosInstance } from '@/plugins/axios'
@@ -21,15 +22,13 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axiosInstance.post('/login', credentials)
         const token = response.data.token
-
         if (!token) throw new Error('Token tidak ditemukan')
-
         Cookies.set('token', token)
         this.success = 'Login success'
         await this.checkAuth()
         router.push({ name: 'dashboard' })
       } catch (error) {
-        this.error = handleError(error) // make sure this returns a proper object
+        this.error = handleError(error)
       } finally {
         this.loading = false
       }
@@ -37,8 +36,10 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       Cookies.remove('token')
+      this.user = null
+      this.error = null
+      this.success = 'Logout Success'
       router.push({ name: 'login' })
-      ;(this.user = null), (this.error = null), (this.success = 'Logout Success')
     },
 
     async checkAuth() {
@@ -46,13 +47,15 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axiosInstance.get('/me')
         this.user = response.data.data
-        return this.user
       } catch (error) {
         if (error.response && error.response.status === 401) {
           this.logout()
+        } else {
+          this.error = handleError(error)
         }
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
   },
 })
