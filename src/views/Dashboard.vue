@@ -119,7 +119,7 @@ onMounted(() => {
       </div>
       <div class="card flex flex-col w-full rounded-2xl p-6 gap-3 bg-white">
         <div class="flex items-center justify-between">
-          <p class="font-medium text-desa-secondary">Kepala Rumah</p>
+          <p class="font-medium text-desa-secondary">Kepala Keluarga</p>
           <img
             src="@/assets/images/icons/crown-foreshadow-background.svg"
             class="flex size-12 shrink-0"
