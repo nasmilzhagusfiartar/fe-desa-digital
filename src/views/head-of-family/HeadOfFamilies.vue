@@ -66,7 +66,7 @@ watch(
           <input
             v-model="filters.search"
             type="text"
-            placeholder="Cari nama Kepala Rumah atau NIK"
+            placeholder="Cari nama Kepala Keluarga atau NIK"
             class="appearance-none outline-none w-full h-14 rounded-2xl ring-[1.5px] ring-desa-background focus:ring-desa-black py-4 pl-12 pr-6 gap-2 font-medium placeholder:text-desa-secondary transition-all duration-300"
           />
           <div class="absolute transform -translate-y-1/2 top-1/2 left-4 flex size-6 shrink-0">

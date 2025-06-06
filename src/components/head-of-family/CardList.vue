@@ -50,11 +50,11 @@ defineProps({
         >{{ item.family_members.length }} Anggota Keluarga</span
       >
     </p>
-    <a
-      href="kd-kepala-rumah-manage.html"
+    <RouterLink
+      :to="{ name: 'manage-head-of-family', params: { id: item.id } }"
       class="flex items-center shrink-0 gap-[10px] rounded-2xl py-4 px-6 bg-desa-black"
     >
       <span class="font-medium text-white">Manage</span>
-    </a>
+    </RouterLink>
   </div>
 </template>
