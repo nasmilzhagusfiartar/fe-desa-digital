@@ -1,15 +1,24 @@
 <script setup>
+import { ucfirst } from '@/helpers/format'
 import router from '@/router'
 import { useHeadOfFamilyStore } from '@/stores/headOfFamily'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
+const headOfFamily = ref({})
+
 const headOfFamilyStore = useHeadOfFamilyStore()
 const { loading } = storeToRefs(headOfFamilyStore)
-const { deleteHeadOfFamily } = headOfFamilyStore
+const { fetchHeadOfFamily, deleteHeadOfFamily } = headOfFamilyStore
+
+const fetchData = async () => {
+  const response = await fetchHeadOfFamily(route.params.id)
+
+  headOfFamily.value = response
+}
 
 const showModalDelete = ref(false)
 
@@ -18,6 +27,19 @@ async function handleDelete() {
 
   router.push({ name: 'head-of-family' })
 }
+
+const calculateAge = (dateString) => {
+  const today = new Date()
+  const birthDate = new Date(dateString)
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const m = today.getMonth() - birthDate.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+  return age
+}
+
+onMounted(fetchData)
 </script>
 
 <template>
@@ -50,26 +72,30 @@ async function handleDelete() {
         <div class="flex items-center gap-4">
           <div class="flex size-[76px] shrink-0 rounded-full overflow-hidden bg-desa-foreshadow">
             <img
-              src="@/assets/images/photos/photo-2.png"
+              :src="headOfFamily.profile_picture"
               class="w-full h-full object-cover"
               alt="photo"
             />
           </div>
           <div class="flex flex-col gap-[6px] w-full">
-            <p class="font-semibold text-xl line-clamp-1">Feri Mahrudin Asep</p>
+            <p class="font-semibold text-xl line-clamp-1">{{ headOfFamily.user?.name }}</p>
             <p class="flex items-center gap-1">
               <img
                 src="@/assets/images/icons/briefcase-secondary-green.svg"
                 class="flex size-[18px] shrink-0"
                 alt="icon"
               />
-              <span class="font-medium text-sm text-desa-secondary">Tukang Bangunan</span>
+              <span class="font-medium text-sm text-desa-secondary">{{
+                headOfFamily.occupation
+              }}</span>
             </p>
           </div>
           <div
             class="badge rounded-full p-3 gap-2 flex w-[100px] justify-center shrink-0 bg-desa-soft-green"
           >
-            <span class="font-semibold text-xs text-white uppercase">Menikah</span>
+            <span class="font-semibold text-xs text-white uppercase">{{
+              headOfFamily.marital_status
+            }}</span>
           </div>
         </div>
         <hr class="border-desa-foreshadow" />
@@ -84,7 +110,7 @@ async function handleDelete() {
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <p class="font-semibold text-xl leading-[22.5px]">20051005922001005</p>
+            <p class="font-semibold text-xl leading-[22.5px]">{{ headOfFamily.identity_number }}</p>
             <span class="font-medium text-desa-secondary"> Nomor Induk Kependudukan </span>
           </div>
         </div>
@@ -100,7 +126,9 @@ async function handleDelete() {
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <p class="font-semibold text-xl leading-[22.5px]">42 Tahun</p>
+            <p class="font-semibold text-xl leading-[22.5px]">
+              {{ calculateAge(headOfFamily.date_of_birth) }} Tahun
+            </p>
             <span class="font-medium text-desa-secondary"> Umur Kepala Keluarga </span>
           </div>
         </div>
@@ -116,7 +144,7 @@ async function handleDelete() {
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <p class="font-semibold text-xl leading-[22.5px]">Pria</p>
+            <p class="font-semibold text-xl leading-[22.5px]">{{ ucfirst(headOfFamily.gender) }}</p>
             <span class="font-medium text-desa-secondary"> Jenis Kelamin </span>
           </div>
         </div>
@@ -132,7 +160,7 @@ async function handleDelete() {
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <p class="font-semibold text-xl leading-[22.5px]">fransutomo@desadigital.com</p>
+            <p class="font-semibold text-xl leading-[22.5px]">{{ headOfFamily.user?.email }}</p>
             <span class="font-medium text-desa-secondary"> Email Address </span>
           </div>
         </div>
@@ -148,15 +176,21 @@ async function handleDelete() {
             />
           </div>
           <div class="flex flex-col gap-1 w-full">
-            <p class="font-semibold text-xl leading-[22.5px]">083212349000</p>
+            <p class="font-semibold text-xl leading-[22.5px]">{{ headOfFamily.phone_number }}</p>
             <span class="font-medium text-desa-secondary"> Nomor Hp </span>
           </div>
         </div>
       </section>
-      <section id="Anggota-Keluarga" class="flex flex-col rounded-3xl p-6 gap-6 bg-white">
+      <section
+        id="Anggota-Keluarga"
+        class="flex flex-col rounded-3xl p-6 gap-6 bg-white"
+        v-if="headOfFamily.family_members?.length"
+      >
         <div class="flex items-center justify-between">
           <div class="flex flex-col gap-[6px]">
-            <p class="font-semibold text-[32px] leading-10">3</p>
+            <p class="font-semibold text-[32px] leading-10">
+              {{ headOfFamily.family_members?.length }}
+            </p>
             <p class="font-medium leading-5 text-desa-secondary">Anggota Keluarga</p>
           </div>
           <img
@@ -166,31 +200,38 @@ async function handleDelete() {
           />
         </div>
         <hr class="border-desa-foreshadow" />
-        <div id="Istri" class="flex flex-col gap-[14px]">
-          <p class="font-medium leading-5 text-desa-secondary">Istri (1)</p>
-          <div class="card flex flex-col rounded-2xl border border-desa-background p-4 gap-6">
+        <div class="flex flex-col gap-[14px]">
+          <div
+            class="card flex flex-col rounded-2xl border border-desa-background p-4 gap-6"
+            v-for="(familyMember, index) in headOfFamily.family_members"
+            :key="index"
+          >
             <div class="flex items-center gap-4">
               <div
                 class="flex size-[64px] shrink-0 rounded-full overflow-hidden bg-desa-foreshadow"
               >
                 <img
-                  src="@/assets/images/photos/kk-photo-2.png"
+                  :src="familyMember.profile_picture"
                   class="w-full h-full object-cover"
                   alt="photo"
                 />
               </div>
               <div class="flex flex-col gap-[6px] w-full">
-                <p class="font-semibold text-xl line-clamp-1">Puji Siti Aminah</p>
+                <p class="font-semibold text-xl line-clamp-1">{{ familyMember.user?.name }}</p>
                 <p class="flex items-center gap-1">
                   <img
                     src="@/assets/images/icons/briefcase-secondary-green.svg"
                     class="flex size-[18px] shrink-0"
                     alt="icon"
                   />
-                  <span class="font-medium text-sm text-desa-secondary">Ibu Rumah Tangga</span>
+                  <span class="font-medium text-sm text-desa-secondary">{{
+                    familyMember.occupation
+                  }}</span>
                 </p>
               </div>
-              <p class="font-medium leading-5 text-nowrap">32 tahun</p>
+              <p class="font-medium leading-5 text-nowrap">
+                {{ calculateAge(familyMember.date_of_birth) }} tahun
+              </p>
             </div>
             <hr class="border-desa-background" />
             <div class="flex justify-between items-center">
@@ -204,88 +245,7 @@ async function handleDelete() {
                   >Nomor Induk Kependudukan:</span
                 >
               </p>
-              <p class="font-medium leading-5">27192018210818291</p>
-            </div>
-          </div>
-        </div>
-        <div id="Anak" class="flex flex-col gap-[14px]">
-          <p class="font-medium leading-5 text-desa-secondary">Anak (2)</p>
-          <div class="card flex flex-col rounded-2xl border border-desa-background p-4 gap-6">
-            <div class="flex items-center gap-4">
-              <div
-                class="flex size-[64px] shrink-0 rounded-full overflow-hidden bg-desa-foreshadow"
-              >
-                <img
-                  src="@/assets/images/photos/kk-photo-3.png"
-                  class="w-full h-full object-cover"
-                  alt="photo"
-                />
-              </div>
-              <div class="flex flex-col gap-[6px] w-full">
-                <p class="font-semibold text-xl line-clamp-1">Karin Icshan</p>
-                <p class="flex items-center gap-1">
-                  <img
-                    src="@/assets/images/icons/briefcase-secondary-green.svg"
-                    class="flex size-[18px] shrink-0"
-                    alt="icon"
-                  />
-                  <span class="font-medium text-sm text-desa-secondary">Mahasiswi</span>
-                </p>
-              </div>
-              <p class="font-medium leading-5 text-nowrap">24 Tahun</p>
-            </div>
-            <hr class="border-desa-background" />
-            <div class="flex justify-between items-center">
-              <p class="flex items-center gap-1">
-                <img
-                  src="@/assets/images/icons/keyboard-secondary-green.svg"
-                  class="flex size-[18px] shrink-0"
-                  alt="icon"
-                />
-                <span class="font-medium text-sm text-desa-secondary"
-                  >Nomor Induk Kependudukan:</span
-                >
-              </p>
-              <p class="font-medium leading-5">24910120192019281</p>
-            </div>
-          </div>
-          <div class="card flex flex-col rounded-2xl border border-desa-background p-4 gap-6">
-            <div class="flex items-center gap-4">
-              <div
-                class="flex size-[64px] shrink-0 rounded-full overflow-hidden bg-desa-foreshadow"
-              >
-                <img
-                  src="@/assets/images/photos/photo-1.png"
-                  class="w-full h-full object-cover"
-                  alt="photo"
-                />
-              </div>
-              <div class="flex flex-col gap-[6px] w-full">
-                <p class="font-semibold text-xl line-clamp-1">Rizky Icshan</p>
-                <p class="flex items-center gap-1">
-                  <img
-                    src="@/assets/images/icons/briefcase-secondary-green.svg"
-                    class="flex size-[18px] shrink-0"
-                    alt="icon"
-                  />
-                  <span class="font-medium text-sm text-desa-secondary">Mahasiswa</span>
-                </p>
-              </div>
-              <p class="font-medium leading-5 text-nowrap">17 tahun</p>
-            </div>
-            <hr class="border-desa-background" />
-            <div class="flex justify-between items-center">
-              <p class="flex items-center gap-1">
-                <img
-                  src="@/assets/images/icons/keyboard-secondary-green.svg"
-                  class="flex size-[18px] shrink-0"
-                  alt="icon"
-                />
-                <span class="font-medium text-sm text-desa-secondary"
-                  >Nomor Induk Kependudukan:</span
-                >
-              </p>
-              <p class="font-medium leading-5">28193018301839101</p>
+              <p class="font-medium leading-5">{{ familyMember.identity_number }}</p>
             </div>
           </div>
         </div>

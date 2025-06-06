@@ -102,7 +102,7 @@ const handleSubmit = async () => {
           <p
             class="font-medium leading-5 text-desa-secondary group-hover:text-desa-dark-green group-has-[:checked]:text-desa-dark-green transition-all duration-300"
           >
-            Kepala Rumah
+            Kepala Keluarga
           </p>
           <div class="relative">
             <img

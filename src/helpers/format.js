@@ -39,6 +39,7 @@ export function formatToClientTimezone(date) {
   return originalDate.setZone(timezone).setLocale('id').toFormat('dd LLLL yyyy, HH:mm')
 }
 
-export function ucfirst(str) {
-  return string ? string.charAt(0).toUpperCase() + string.slice(1) : ''
+export function ucfirst(string) {
+  if (!string) return ''
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
