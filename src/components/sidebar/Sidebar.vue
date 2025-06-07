@@ -4,6 +4,8 @@ import iconChartActive from '@/assets/images/icons/chart-square-dark-green.svg'
 import iconChartInactive from '@/assets/images/icons/chart-square-secondary-green.svg'
 import iconCrownActive from '@/assets/images/icons/crown-dark-green.svg'
 import iconCrownInactive from '@/assets/images/icons/crown-secondary-green.svg'
+import iconBagActive from '@/assets/images/icons/bag-2-dark-green.svg'
+import iconBagInactive from '@/assets/images/icons/bag-2-secondary-green.svg'
 
 const sidebarItems = [
   {
@@ -17,6 +19,18 @@ const sidebarItems = [
     path: '/head-of-family',
     iconActive: iconCrownActive,
     iconInactive: iconCrownInactive,
+  },
+  {
+    label: 'Bantuan Sosial',
+    path: '',
+    iconActive: iconBagActive,
+    iconInactive: iconBagInactive,
+    children: [
+      {
+        label: 'List Bansos',
+        path: '/social-assistance',
+      },
+    ],
   },
 ]
 </script>
@@ -40,7 +54,7 @@ const sidebarItems = [
             <img src="@/assets/images/icons/menu-secondary-green.svg" class="size-6" alt="icon" />
           </button>
         </div>
-        <div class="flex flex-col flex-1 gap-6 overflow-y-scroll hide-scrollbar">
+        <div class="flex flex-col flex-1 gap-6 overflow-y-auto hide-scrollbar">
           <nav class="flex flex-col gap-2 pb-12">
             <p class="font-medium text-sm text-desa-secondary">Main Menu</p>
             <ul class="flex flex-col gap-2">
